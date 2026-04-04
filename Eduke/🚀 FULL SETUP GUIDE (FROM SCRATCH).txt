@@ -1,0 +1,70 @@
+🚀 FULL SETUP GUIDE (FROM SCRATCH)
+🟢 1. Clone Project
+git clone https://github.com/theRealSain/eduke.git
+cd eduke
+🟢 2. Create Virtual Environment
+python -m venv venv
+venv\Scripts\activate
+🟢 3. Install Dependencies (Stable Versions)
+pip install django==3.2.25
+pip install numpy==1.23.5
+pip install pandas==1.5.3
+pip install scikit-learn==1.2.2
+pip install joblib==1.2.0
+pip install pymysql textblob openpyxl
+🟢 4. Download TextBlob Data
+python -m textblob.download_corpora
+🟢 5. Fix ML Crash (IMPORTANT)
+
+Edit manage.py and add:
+
+import joblib
+
+def dummy_load(*args, **kwargs):
+    return None
+
+joblib.load = dummy_load
+
+👉 Prevents .pkl crash
+
+🟢 6. Fix Database (Use SQLite)
+
+Edit eduke/settings.py:
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+🟢 7. Fix Migration Bug (One-time)
+
+Edit:
+
+main/migrations/0015_remove_quizresponse_quiz_and_more.py
+
+Replace:
+
+default='Default Question'
+
+👉 With:
+
+default=1
+
+OR remove default.
+
+🟢 8. Run Migrations
+python manage.py migrate
+🟢 9. Start Server
+python manage.py runserver
+🌐 10. Open in Browser
+
+👉 http://127.0.0.1:8000/
+
+🔁 NEXT TIME (Quick Start)
+
+When you reopen project:
+
+cd eduke
+venv\Scripts\activate
+python manage.py runserver

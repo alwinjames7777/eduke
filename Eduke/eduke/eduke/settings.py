@@ -82,12 +82,8 @@ WSGI_APPLICATION = 'eduke.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',  # Backend for MySQL
-        'NAME': 'eduke',                        # Your database name
-        'USER': 'root',                        # Your database username (default is 'root' for XAMPP)
-        'PASSWORD': '2519',                         # Your database password
-        'HOST': 'localhost',                   # Host (usually localhost for XAMPP)
-        'PORT': '3307',                        # Default MySQL port
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 

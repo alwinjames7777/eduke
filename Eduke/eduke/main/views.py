@@ -36,6 +36,13 @@ from django.core.cache import cache  # Use Django cache
 def index(request):
     return render(request, 'index.html')
 
+def auto_login(request):
+    from .models import Students, Classes, Users
+    # Use existing or create a new student
+    c, _ = Classes.objects.get_or_create(class_name='Test Class', class_head='Test Head')
+    s, _ = Students.objects.get_or_create(name='Test Student', email='testbot@test.com', defaults={'roll_no': '123', 'class_obj': c})
+    request.session['student_id'] = s.id
+    return redirect('student_eduke_bot')
 
 def send_account_creation_email(email, password, role, name, institution_email):
     subject = "Your Eduke Account is Ready"

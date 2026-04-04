@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='quizresponse',
             name='question',
-            field=models.ForeignKey(default='Default Question', on_delete=django.db.models.deletion.CASCADE, to='main.quizquestions'),
+            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='main.quizquestions'),
             preserve_default=False,
         ),
     ]

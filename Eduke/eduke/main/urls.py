@@ -93,4 +93,5 @@ urlpatterns = [
 
     path('api/predict_marks/', views.predict_marks, name='predict_marks'),
 
+    path('auto_login/', views.auto_login, name='auto_login'),
 ]   

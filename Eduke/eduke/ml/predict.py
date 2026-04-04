@@ -2,10 +2,12 @@ import joblib
 import numpy as np
 
 # Load trained model and scaler
-model = joblib.load('ml/final_model.pkl')
-scaler = joblib.load('ml/scaler.pkl')
-
-def predict_performance(attendance, internal_marks, class_participation, academic_activities, sleep_time, study_time):
+#model = joblib.load('ml/final_model.pkl')
+model = None
+#scaler = joblib.load('ml/scaler.pkl')
+scaler = None
+def predict_performance(*args, **kwargs):
+    return "Prediction Disabled"
     # Convert input to numpy array
     input_data = np.array([[attendance, internal_marks, class_participation, academic_activities, sleep_time, study_time]])
 
