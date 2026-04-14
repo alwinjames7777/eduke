@@ -71,51 +71,49 @@ tbody{
     width: fit-content;
 }
 
-/* Custom styling for the range input (slider) */
-.rating-slider {
+/* === Modern Standard Slider === */
+.modern-slider {
     -webkit-appearance: none;
     appearance: none;
     width: 200px;
-    height: 12px; 
-    background: transparent; 
+    height: 8px; /* Thinner track */
+    background: #e5e7eb; /* Neutral gray round track */
+    border-radius: 4px;
     outline: none;
-    position: relative;
     cursor: pointer;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 }
 
-/* Track (bar) of the slider */
-.rating-slider::-webkit-slider-runnable-track {
+.modern-slider::-webkit-slider-runnable-track {
     width: 100%;
-    height: 12px;
-    border-radius: 6px;
-    background: #e2e8f0; /* Visible solid line track */
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); /* Slight inset for depth */
+    height: 8px;
+    border-radius: 4px;
+    /* Track background is handled on the input itself in webkit often, 
+       but we can apply it here for consistency */
+    background: transparent; 
 }
 
-/* Custom thumb (handle) */
-.rating-slider::-webkit-slider-thumb {
+.modern-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 24px;
-    height: 24px;
-    background: url("/static/main/images/star-solid.svg") center/cover;
-    border: none;
+    width: 20px;
+    height: 20px;
+    background: #7e22ce; /* Purple circular thumb */
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 4px rgba(0,0,0,0.3);
     cursor: pointer;
-    position: relative;
-    margin-top: -6px; /* Align thumb with track vertically */
-    z-index: 3;
-    /* Apply yellow filter */
-    filter: brightness(0) saturate(100%) invert(19%) sepia(86%) saturate(535%) hue-rotate(242deg);
-    transition: transform 0.15s ease-in-out;
+    margin-top: -6px; /* Align with track horizontally */
+    transition: background 0.15s ease-in-out, transform 0.1s;
 }
 
-.rating-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2); /* Slight pop on hover */
+.modern-slider::-webkit-slider-thumb:hover {
+    background: #6b21a8;
+    transform: scale(1.1);
 }
 
-/* Base tailwind-like focus ring */
-.rating-slider:focus::-webkit-slider-thumb {
-    filter: brightness(0) saturate(100%) invert(19%) sepia(86%) saturate(535%) hue-rotate(242deg) drop-shadow(0 0 4px rgba(126, 34, 206, 0.8));
+.modern-slider:focus::-webkit-slider-thumb {
+    box-shadow: 0 0 0 3px rgba(126, 34, 206, 0.3);
 }
 
 

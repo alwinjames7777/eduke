@@ -144,7 +144,7 @@
                                         <div class="rating-container relative flex items-center gap-2">
                                             <input type="range" min="0" max="100" step="0.5"
                                                 value="{{ subject.sleep_time_rating|default:0 }}"
-                                                class="rating-slider"
+                                                class="modern-slider"
                                                 name="sleep_time_rating_{{ subject.id }}"
                                                 oninput="updateStarHighlight(this)">
                                             <span class="rating-value text-purple-700 font-semibold w-8 text-right">
@@ -158,7 +158,7 @@
                                         <div class="rating-container relative flex items-center gap-2">
                                             <input type="range" min="0" max="100" step="0.5"
                                                 value="{{ subject.study_time_rating|default:0 }}"
-                                                class="rating-slider"
+                                                class="modern-slider"
                                                 name="study_time_rating_{{ subject.id }}"
                                                 oninput="updateStarHighlight(this)">
                                             <span class="rating-value text-purple-700 font-semibold w-8 text-right">
@@ -185,7 +185,7 @@
 
         <script>
             // Update displayed rating value when the slider moves
-            document.querySelectorAll(".rating-slider").forEach(slider => {
+            document.querySelectorAll(".modern-slider").forEach(slider => {
                 slider.addEventListener("input", function() {
                     this.nextElementSibling.textContent = this.value;
                 });

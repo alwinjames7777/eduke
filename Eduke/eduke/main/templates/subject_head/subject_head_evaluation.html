@@ -179,7 +179,7 @@
                                       <div class="rating-container relative flex items-center gap-2">
                                         <input type="range" min="0" max="100" step="0.5"
                                             value="{{ student.class_participation_rating|default:0 }}" 
-                                            class="rating-slider"
+                                            class="modern-slider"
                                             name="class_participation_rating_{{ student.roll_no }}"
                                             data-student="{{ student.roll_no }}"
                                             oninput="updateStarHighlight(this)">
@@ -234,7 +234,7 @@
                                     <div class="rating-container relative flex items-center gap-2">
                                       <input type="range" min="0" max="100" step="0.5"
                                           value="{{ student.academic_activity_rating|default:0 }}" 
-                                          class="rating-slider"
+                                          class="modern-slider"
                                           name="academic_activity_rating_{{ student.roll_no }}"
                                           data-student="{{ student.roll_no }}"
                                           oninput="updateStarHighlight(this)">
@@ -287,7 +287,7 @@
 
         <script>
             // Update displayed rating value when the slider moves
-            document.querySelectorAll(".rating-slider").forEach(slider => {
+            document.querySelectorAll(".modern-slider").forEach(slider => {
                 slider.addEventListener("input", function() {
                     this.nextElementSibling.textContent = this.value;
                 });
