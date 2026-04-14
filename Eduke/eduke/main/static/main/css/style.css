@@ -76,60 +76,46 @@ tbody{
     -webkit-appearance: none;
     appearance: none;
     width: 200px;
-    height: 30px;
-    background: transparent;
+    height: 8px; /* Thinner track */
+    background: #e5e7eb; /* Neutral gray track background */
+    border-radius: 4px;
     outline: none;
     position: relative;
-    z-index: 2;
     cursor: pointer;
 }
 
 /* Track (bar) of the slider */
 .rating-slider::-webkit-slider-runnable-track {
     width: 100%;
-    height: 12px;
-    border-radius: 6px;
-    padding: 5px 8px 5px 8px;
+    height: 8px;
+    border-radius: 4px;
+    background: transparent;
 }
 
 /* Custom thumb (handle) */
 .rating-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 24px;
-    height: 24px;
-    background: url("/static/main/images/star-solid.svg") center/cover;
-    border: none;
+    width: 20px;
+    height: 20px;
+    background: #7e22ce; /* Purple thumb */
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 4px rgba(0,0,0,0.3);
     cursor: pointer;
     position: relative;
-    margin-top: -13px;
+    margin-top: -6px; /* Align thumb with track vertically */
     z-index: 3;
-    /* Apply yellow filter */
-    filter: brightness(0) saturate(100%) invert(19%) sepia(86%) saturate(535%) hue-rotate(242deg);
+    transition: background 0.15s ease-in-out;
 }
 
-
-/* Star overlay */
-.star-overlay {
-    position: absolute;
-    top: 50%;
-    left: 5px;
-    width: 190px;
-    height: 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 5px;
-    pointer-events: none;
-    transform: translateY(-50%);
-    z-index: 1;
+.rating-slider::-webkit-slider-thumb:hover {
+    background: #6b21a8; /* Darker purple on hover */
 }
 
-/* Star icons */
-.star-overlay i {
-    color: #ad16ff90;
-    font-size: 18px;
-    opacity: 0.8;
+/* Base tailwind-like focus ring */
+.rating-slider:focus::-webkit-slider-thumb {
+    box-shadow: 0 0 0 3px rgba(126, 34, 206, 0.3);
 }
 
 
