@@ -4732,10 +4732,10 @@ def student_eduke_bot(request):
         if "best and worst subjects" in query or "strongest and weakest subjects" in query:
             with connection.cursor() as cursor:
                 cursor.execute("""
-                    SELECT main_subjects.subject_name, main_marks.mark_percentage 
-                    FROM main_marks 
-                    JOIN main_subjects ON main_marks.subject_id = main_subjects.id
-                    WHERE main_marks.student_id = %s
+                    SELECT main_subjects.subject_name, main_studentevaluation.marks_percentage 
+                    FROM main_studentevaluation 
+                    JOIN main_subjects ON main_studentevaluation.subject_id = main_subjects.id
+                    WHERE main_studentevaluation.student_id = %s AND main_studentevaluation.marks_percentage IS NOT NULL
                 """, [student_id])
                 marks_data = cursor.fetchall()
 
@@ -4927,8 +4927,9 @@ def student_eduke_bot(request):
         if "leaderboard" in query or "top students" in query:
             with connection.cursor() as cursor:
                 cursor.execute("""
-                    SELECT name, AVG(mark_percentage) as avg_marks FROM main_students 
-                    JOIN main_marks ON main_students.id = main_marks.student_id
+                    SELECT name, AVG(marks_percentage) as avg_marks FROM main_students 
+                    JOIN main_studentevaluation ON main_students.id = main_studentevaluation.student_id
+                    WHERE main_studentevaluation.marks_percentage IS NOT NULL
                     GROUP BY main_students.id ORDER BY avg_marks DESC LIMIT 5
                 """)
                 leaderboard = cursor.fetchall()
@@ -4937,7 +4938,12 @@ def student_eduke_bot(request):
             return JsonResponse({"response": f"🏆 Top Performing Students:\n{leaderboard_text}\n\nKeep working hard! 💪"})
 
 
-        # 🔹 Default Response
+        # 🔹 AI Fallback Response
+        ai_response = get_gemini_response(request.GET.get("query", ""), student_name=student_details["name"])
+        if ai_response:
+            return JsonResponse({"response": ai_response})
+
+        # 🔹 Default Response (if AI is not configured or fails)
         return JsonResponse({"response": "I'm here to help with attendance, marks, and study tips! Just ask! 😊"})
 
     return render(request, "students/student_eduke_bot.html", {"student": student_details})
@@ -5931,10 +5937,10 @@ def parent_eduke_bot(request):
         if "best and worst subjects" in query or "strongest and weakest subjects" in query:
             with connection.cursor() as cursor:
                 cursor.execute("""
-                    SELECT main_subjects.subject_name, main_marks.mark_percentage 
-                    FROM main_marks 
-                    JOIN main_subjects ON main_marks.subject_id = main_subjects.id
-                    WHERE main_marks.student_id = %s
+                    SELECT main_subjects.subject_name, main_studentevaluation.marks_percentage 
+                    FROM main_studentevaluation 
+                    JOIN main_subjects ON main_studentevaluation.subject_id = main_subjects.id
+                    WHERE main_studentevaluation.student_id = %s AND main_studentevaluation.marks_percentage IS NOT NULL
                 """, [student_id])
                 marks_data = cursor.fetchall()
 
