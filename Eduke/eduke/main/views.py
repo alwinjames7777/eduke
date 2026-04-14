@@ -4455,6 +4455,42 @@ def preprocess_text(text):
     return text
 
 
+def get_gemini_response(query, student_name="Student"):
+    """Use Google Gemini AI to generate a response for any question."""
+    try:
+        import google.generativeai as genai
+        
+        api_key = getattr(settings, 'GEMINI_API_KEY', '')
+        if not api_key:
+            return None  # No API key configured, skip AI response
+        
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-2.0-flash')
+        
+        system_prompt = (
+            f"You are Eduke Bot, a friendly and knowledgeable educational assistant for students. "
+            f"The student's name is {student_name}. "
+            f"You help with academics, study tips, motivation, general knowledge, science, math, "
+            f"history, technology, career guidance, and any educational topic. "
+            f"Keep responses concise (2-4 sentences max), helpful, and encouraging. "
+            f"Use emojis occasionally to be friendly. "
+            f"If the question is inappropriate or harmful, politely decline and redirect to academics."
+        )
+        
+        response = model.generate_content(
+            f"{system_prompt}\n\nStudent asks: {query}",
+            generation_config=genai.types.GenerationConfig(
+                max_output_tokens=300,
+                temperature=0.7,
+            )
+        )
+        
+        return response.text if response.text else None
+    except Exception as e:
+        print(f"Gemini API error: {e}")
+        return None
+
+
 def student_eduke_bot(request):
     """Handles chatbot page rendering and processing chatbot queries."""
 

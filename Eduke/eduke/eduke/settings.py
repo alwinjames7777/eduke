@@ -153,3 +153,7 @@ EMAIL_USE_TLS = True  # Use TLS for security
 EMAIL_HOST_USER = 'sainsaburaj38@gmail.com'  # Your email (sender)
 EMAIL_HOST_PASSWORD = 'xsxu qycp ulne qtck'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # Default sender email
+
+# Gemini AI API Key for Eduke Bot
+# Get your FREE API key from: https://aistudio.google.com/apikey
+GEMINI_API_KEY = ''  # Paste your Gemini API key here
