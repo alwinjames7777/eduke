@@ -1658,7 +1658,7 @@ def class_head_class(request):
         if announcement_text:
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "INSERT INTO main_announcements (message, created_at, class_obj_id) VALUES (%s, NOW(), %s)",
+                    "INSERT INTO main_announcements (message, created_at, class_obj_id) VALUES (%s, datetime('now'), %s)",
                     [announcement_text, class_id]
                 )
                 print(f"Inserted Announcement: {announcement_text}")  # Debugging output
@@ -1877,7 +1877,7 @@ def class_head_chat_user(request, user_id):
             with connection.cursor() as cursor:
                 cursor.execute(""" 
                     INSERT INTO main_chat (sender_id, receiver_id, message, created_at) 
-                    VALUES (%s, %s, %s, NOW());
+                    VALUES (%s, %s, %s, datetime('now'));
                 """, [logged_in_user_id, user_id, message_text])
             print(f"Message sent: '{message_text}' from {logged_in_user_id} to {user_id}")
             return redirect('class_head_chat_user', user_id=user_id)  # Refresh page after sending
@@ -3168,7 +3168,7 @@ def subject_head_attendance(request):
 
                 cursor.execute("""
                     INSERT INTO main_attendance (student_id, subject_id, attendance_date, hour, status, created_at)
-                    VALUES (%s, %s, %s, %s, %s, NOW())
+                    VALUES (%s, %s, %s, %s, %s, datetime('now'))
                 """, [student_id, subject_id, attendance_date, hour, status])
                 print(f"✅ Attendance Added - Student: {student_id}, Date: {attendance_date}, Hour: {hour}, Status: {status}")
 
@@ -4097,7 +4097,7 @@ def student_chat_user(request, user_id):
             with connection.cursor() as cursor:
                 cursor.execute("""
                     INSERT INTO main_chat (sender_id, receiver_id, message, created_at)
-                    VALUES (%s, %s, %s, NOW())
+                    VALUES (%s, %s, %s, datetime('now'))
                 """, [logged_in_user_id, user_id, message_text])
             return redirect('student_chat_user', user_id=user_id)
 
@@ -5533,7 +5533,7 @@ def parent_chat_user(request, user_id):
             with connection.cursor() as cursor:
                 cursor.execute("""
                     INSERT INTO main_chat (sender_id, receiver_id, message, created_at)
-                    VALUES (%s, %s, %s, NOW())
+                    VALUES (%s, %s, %s, datetime('now'))
                 """, [parent_user_id[0], user_id, message_text])
 
             # Redirect the user back to the chat page to see the new message
