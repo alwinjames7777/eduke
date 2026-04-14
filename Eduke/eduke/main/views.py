@@ -1041,79 +1041,80 @@ def admin_profile(request):
 
 def delete_class(request, class_id):
     if request.method == "POST":
-        with connection.cursor() as cursor:
-            # Fetch all user_ids that need to be deleted
-            cursor.execute("""
-                SELECT user_id FROM main_classes WHERE id = %s
-                UNION
-                SELECT user_id FROM main_subjects WHERE class_obj_id = %s
-                UNION
-                SELECT user_id FROM main_students WHERE class_obj_id = %s
-                UNION
-                SELECT user_id FROM main_parents WHERE student_id IN 
-                    (SELECT id FROM main_students WHERE class_obj_id = %s)
-            """, [class_id, class_id, class_id, class_id])
+        try:
+            class_obj = Classes.objects.get(id=class_id)
             
-            user_ids = cursor.fetchall()  # List of tuples (each tuple contains one user_id)
+            users_to_delete = []
+            if class_obj.user_id:
+                users_to_delete.append(class_obj.user_id)
+                
+            for subject in Subjects.objects.filter(class_obj=class_obj):
+                if subject.user_id:
+                    users_to_delete.append(subject.user_id)
+                    
+            students = Students.objects.filter(class_obj=class_obj)
+            for student in students:
+                if student.user_id:
+                    users_to_delete.append(student.user_id)
+                parent = Parents.objects.filter(student=student).first()
+                if parent and parent.user_id:
+                    users_to_delete.append(parent.user_id)
 
-            if user_ids:
-                user_ids = [user_id[0] for user_id in user_ids]  # Convert tuples to a list of IDs
-
-                # Delete the class (automatically deletes subjects, students, and parents)
-                cursor.execute("DELETE FROM main_classes WHERE id = %s", [class_id])
-
-                # Delete corresponding users from main_users
-                cursor.execute("DELETE FROM main_users WHERE id IN %s", [tuple(user_ids)])
-
-        # Success message
-        messages.success(request, "Class and associated users deleted successfully.", extra_tags="classes_success")
+            # Manually delete students because the model is set to SET_NULL
+            students.delete()
+            
+            # Deletes class and cascades to subjects
+            class_obj.delete()
+            
+            if users_to_delete:
+                Users.objects.filter(id__in=users_to_delete).delete()
+                
+            messages.success(request, "Class and associated users deleted successfully.", extra_tags="classes_success")
+        except Classes.DoesNotExist:
+            messages.error(request, "Class not found.", extra_tags="classes_error")
 
     return redirect('admin_classes')  # Redirect to class management page
 
 
 def delete_subject(request, subject_id):
     if request.method == "POST":
-        with connection.cursor() as cursor:
-            # Fetch user_id of the subject head
-            cursor.execute("SELECT user_id FROM main_subjects WHERE id = %s", [subject_id])
-            user_id = cursor.fetchone()  # This will return a tuple like (user_id,)
-
-            # Delete the subject
-            cursor.execute("DELETE FROM main_subjects WHERE id = %s", [subject_id])
-
-            # If user_id exists, delete it from main_users
+        try:
+            subject_obj = Subjects.objects.get(id=subject_id)
+            user_id = subject_obj.user_id
+            
+            subject_obj.delete()
+            
             if user_id:
-                cursor.execute("DELETE FROM main_users WHERE id = %s", [user_id[0]])
-
-        # Success message
-        messages.success(request, "Subject and associated user deleted successfully.", extra_tags="subjects_success")
+                Users.objects.filter(id=user_id).delete()
+                
+            messages.success(request, "Subject and associated user deleted successfully.", extra_tags="subjects_success")
+        except Subjects.DoesNotExist:
+            messages.error(request, "Subject not found.", extra_tags="subjects_error")
 
     return redirect('admin_subjects')  # Redirect to subject management page
 
 
 def delete_student(request, student_id):
     if request.method == "POST":
-        with connection.cursor() as cursor:
-            # Get user_id of the student
-            cursor.execute("SELECT user_id FROM main_students WHERE id = %s", [student_id])
-            student_user_id = cursor.fetchone()  # Returns (user_id,) or None
+        try:
+            student = Students.objects.get(id=student_id)
+            
+            users_to_delete = []
+            if student.user_id:
+                users_to_delete.append(student.user_id)
+                
+            parent = Parents.objects.filter(student=student).first()
+            if parent and parent.user_id:
+                users_to_delete.append(parent.user_id)
 
-            # Get user_id of the parent (if exists)
-            cursor.execute("SELECT user_id FROM main_parents WHERE student_id = (SELECT id FROM main_students WHERE id = %s)", [student_id])
-            parent_user_id = cursor.fetchone()  # Returns (user_id,) or None
-
-            # Delete student record (Parent is automatically deleted due to CASCADE)
-            cursor.execute("DELETE FROM main_students WHERE id = %s", [student_id])
-
-            # Delete student user record
-            if student_user_id:
-                cursor.execute("DELETE FROM main_users WHERE id = %s", [student_user_id[0]])
-
-            # Delete parent user record (only if it exists)
-            if parent_user_id:
-                cursor.execute("DELETE FROM main_users WHERE id = %s", [parent_user_id[0]])
-
-        messages.success(request, "Student and associated user records deleted successfully.", extra_tags="students_success")
+            student.delete()
+            
+            if users_to_delete:
+                Users.objects.filter(id__in=users_to_delete).delete()
+                
+            messages.success(request, "Student and associated user records deleted successfully.", extra_tags="students_success")
+        except Students.DoesNotExist:
+            messages.error(request, "Student not found.", extra_tags="students_error")
 
     return redirect('admin_students')  # Redirect to student management page
 
