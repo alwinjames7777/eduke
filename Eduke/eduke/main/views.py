@@ -759,39 +759,56 @@ def admin_students(request):
 
             print(f"DEBUG: Form Data - Name: {name}, Roll No: {roll_no}, Email: {email}, Password: {password}, Class ID: {class_obj_id}")
 
+            # Check for existing Roll No or Email
+            if Students.objects.filter(roll_no=roll_no).exists():
+                messages.error(request, f"Error: A student with Roll No {roll_no} already exists.")
+                return redirect('admin_students')
+            
+            if email and Students.objects.filter(email=email).exists():
+                messages.error(request, f"Error: A student with Email {email} already exists.")
+                return redirect('admin_students')
+
             try:
                 with transaction.atomic():
-                    with connection.cursor() as cursor:
-                        # Insert into users table (Student)
-                        cursor.execute("INSERT INTO main_users (role) VALUES ('student')")
-                        student_user_id = cursor.lastrowid
-                        print(f"DEBUG: Inserted into users table (student), User ID: {student_user_id}")
+                    # Create student user
+                    student_user = Users.objects.create(role='student')
+                    print(f"DEBUG: Created user (student), User ID: {student_user.id}")
 
-                        # Insert student record (Including Email)
-                        cursor.execute("""
-                            INSERT INTO main_students (name, roll_no, email, password, class_obj_id, user_id)
-                            VALUES (%s, %s, %s, %s, %s, %s)
-                        """, [name, roll_no, email, password, class_obj_id, student_user_id])
-                        student_id = cursor.lastrowid
-                        print(f"DEBUG: Inserted into students table, Student ID: {student_id}")
+                    # Fetch the class instance
+                    class_obj_instance = Classes.objects.get(id=class_obj_id)
 
-                        # Insert into users table (Parent)
-                        cursor.execute("INSERT INTO main_users (role) VALUES ('parent')")
-                        parent_user_id = cursor.lastrowid
-                        print(f"DEBUG: Inserted into users table (parent), User ID: {parent_user_id}")
+                    # Create student record
+                    student = Students.objects.create(
+                        name=name,
+                        roll_no=roll_no,
+                        email=email,
+                        password=password,
+                        class_obj=class_obj_instance,
+                        user=student_user
+                    )
+                    print(f"DEBUG: Created student, Student ID: {student.id}")
 
-                        # Insert parent record
-                        cursor.execute("""
-                            INSERT INTO main_parents (student_id, password, name, user_id)
-                            VALUES (%s, %s, NULL, %s)
-                        """, [student_id, password, parent_user_id])
-                        print(f"DEBUG: Inserted into parents table, Parent User ID: {parent_user_id}")
+                    # Create parent user
+                    parent_user = Users.objects.create(role='parent')
+                    print(f"DEBUG: Created user (parent), User ID: {parent_user.id}")
 
-                    # Send account creation email to student
+                    # Create parent record
+                    Parents.objects.create(
+                        student=student,
+                        password=password,
+                        name=None,
+                        user=parent_user
+                    )
+                    print(f"DEBUG: Created parent, Parent User ID: {parent_user.id}")
+
+                # Send account creation email to student
+                try:
                     send_account_creation_email(email, password, "student", name, institution.email)
+                except Exception as eval_err:
+                    print(f"WARNING: Email could not be sent: {eval_err}")
 
-                    messages.success(request, "Student and Parent added successfully!")
-                    return redirect('admin_students')
+                messages.success(request, "Student and Parent added successfully!")
+                return redirect('admin_students')
 
             except Exception as e:
                 print(f"ERROR: {e}")
