@@ -814,7 +814,11 @@ def admin_students(request):
                 print(f"ERROR: {e}")
                 messages.error(request, f"Error: {str(e)}")
         else:
-            print("DEBUG: Form validation failed")
+            print("DEBUG: Form validation failed", form.errors)
+            # Iterate through form errors and display them as messages
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field.capitalize()}: {error}")
             messages.error(request, "Failed to add student. Please check the form.")
     else:
         form = AddStudentForm()

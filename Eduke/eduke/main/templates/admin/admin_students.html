@@ -167,9 +167,9 @@
                 {% if messages %}
                     {% for message in messages %}
                         <div class="alert text-center mx-auto 
-                                    {% if 'student_success' in message.tags %} text-green-600 {% elif 'student_error' in message.tags %} text-red-600 {% endif %}">
+                                    {% if 'success' in message.tags %} text-green-600 {% elif 'error' in message.tags %} text-red-600 {% endif %} font-bold">
                             {{ message }} 
-                            <span class="text-gray-900">
+                            <span class="text-gray-900 font-normal">
                                 <a href="{% url 'admin_students' %}" class="hover:underline">View Students</a>
                             </span>
                         </div>
