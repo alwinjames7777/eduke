@@ -1874,11 +1874,11 @@ def class_head_chat_user(request, user_id):
     if request.method == 'POST':
         message_text = request.POST.get('message', '').strip()
         if message_text:
-            with connection.cursor() as cursor:
-                cursor.execute(""" 
-                    INSERT INTO main_chat (sender_id, receiver_id, message, created_at) 
-                    VALUES (%s, %s, %s, datetime('now'));
-                """, [logged_in_user_id, user_id, message_text])
+            Chat.objects.create(
+                sender_id=logged_in_user_id,
+                receiver_id=user_id,
+                message=message_text
+            )
             print(f"Message sent: '{message_text}' from {logged_in_user_id} to {user_id}")
             return redirect('class_head_chat_user', user_id=user_id)  # Refresh page after sending
 
@@ -2611,12 +2611,11 @@ def subject_head_chat_user(request, user_id):
         message_text = request.POST.get("message", "").strip()
         
         if message_text:
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO main_chat (message, sender_id, receiver_id, created_at) 
-                    VALUES (%s, %s, %s, %s)
-                """, [message_text, subject_user_id, user_id, now()])
-            
+            Chat.objects.create(
+                sender_id=subject_user_id,
+                receiver_id=user_id,
+                message=message_text
+            )
             print(f"DEBUG: Message sent from {subject_user_id} to {user_id}: {message_text}")
             return redirect('subject_head_chat_user', user_id=user_id)
         else:
@@ -4097,11 +4096,11 @@ def student_chat_user(request, user_id):
     if request.method == 'POST':
         message_text = request.POST.get('message')
         if message_text:
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO main_chat (sender_id, receiver_id, message, created_at)
-                    VALUES (%s, %s, %s, datetime('now'))
-                """, [logged_in_user_id, user_id, message_text])
+            Chat.objects.create(
+                sender_id=logged_in_user_id,
+                receiver_id=user_id,
+                message=message_text
+            )
             return redirect('student_chat_user', user_id=user_id)
 
     return render(request, 'students/student_chat_user.html', {
@@ -5575,12 +5574,11 @@ def parent_chat_user(request, user_id):
         message_text = request.POST.get('message')
         if message_text:
             # Save the new message to the database
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO main_chat (sender_id, receiver_id, message, created_at)
-                    VALUES (%s, %s, %s, datetime('now'))
-                """, [parent_user_id[0], user_id, message_text])
-
+            Chat.objects.create(
+                sender_id=parent_user_id[0],
+                receiver_id=user_id,
+                message=message_text
+            )
             # Redirect the user back to the chat page to see the new message
             return redirect('parent_chat_user', user_id=user_id)
 
