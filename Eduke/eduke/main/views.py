@@ -6264,25 +6264,11 @@ def parent_prediction(request):
 
 
 
-# 🚀 Load Trained Model & Scaler
-MODEL_PATH = os.path.join(settings.BASE_DIR, 'ml', 'final_model.pkl')
-SCALER_PATH = os.path.join(settings.BASE_DIR, 'ml', 'scaler.pkl')
 
-# ✅ Check if files exist before loading
-if os.path.exists(MODEL_PATH) and os.path.exists(SCALER_PATH):
-    model = joblib.load(MODEL_PATH)
-    scaler = joblib.load(SCALER_PATH)
-else:
-    model = None
-    scaler = None
-    print(f"Error: Model or Scaler file missing. Check {MODEL_PATH} and {SCALER_PATH}.")
 
 @csrf_exempt
 def predict_marks(request):
     if request.method == "POST":
-        if model is None or scaler is None:
-            return JsonResponse({"error": "Model or scaler not found. Retrain and save them."}, status=500)
-
         try:
             # 📌 Parse JSON Request
             data = json.loads(request.body)
@@ -6293,15 +6279,13 @@ def predict_marks(request):
             attendance = float(data["attendance_percentage"])
             internal_marks = float(data["internal_marks"])
 
-            # 📌 Scale Input Data
-            input_data = np.array([[sleep_time, study_time, class_participation,
-                                    academic_activity, attendance, internal_marks]])
-            input_scaled = scaler.transform(input_data)
+            from ml.predict import predict_performance
+            predicted_marks = predict_performance(attendance, internal_marks, class_participation, academic_activity, sleep_time, study_time)
+            
+            if isinstance(predicted_marks, str):
+                return JsonResponse({"error": predicted_marks}, status=500)
 
-            # 📌 Predict Final Marks
-            predicted_marks = model.predict(input_scaled)[0]
-
-            return JsonResponse({"predicted_final_marks": round(predicted_marks, 2)})
+            return JsonResponse({"predicted_final_marks": predicted_marks})
         
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
