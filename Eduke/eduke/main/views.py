@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
 from .forms import InstitutionRegisterForm, LoginForm, ClassHeadLoginForm, SubjectHeadLoginForm, StudentLoginForm, ParentLoginForm, AddClassForm, AddSubjectForm, AddStudentForm, ClassUploadForm, SubjectUploadForm, StudentUploadForm
 from .models import Institution, Classes, Subjects, Students, Users, Parents, Chat, Announcements, Attendance, StudentEvaluation, QuizResponse
 from django.db import IntegrityError, transaction
@@ -1713,6 +1714,7 @@ def class_head_profile(request):
 
 
 
+@never_cache
 def class_head_chat(request):
     """Handles the chat functionality for the class head."""
     
@@ -1819,6 +1821,7 @@ def class_head_chat(request):
 
 
 
+@never_cache
 def class_head_chat_user(request, user_id):
     # Retrieve the logged-in class head's ID from session
     class_head_id = request.session.get('class_id')
@@ -2485,6 +2488,7 @@ def subject_head_profile(request):
 
 
 
+@never_cache
 def subject_head_chat(request):
     # Ensure subject head is logged in
     subject_id = request.session.get('subject_id')
@@ -2591,6 +2595,7 @@ def subject_head_chat(request):
 
 
 
+@never_cache
 def subject_head_chat_user(request, user_id):
     # Ensure subject head is logged in
     subject_id = request.session.get('subject_id')
@@ -4024,6 +4029,7 @@ def student_class(request):
 
 
 
+@never_cache
 def student_chat(request):
     student_id = request.session.get('student_id')  # Get student ID from session
     if not student_id:
@@ -4111,6 +4117,7 @@ def student_chat(request):
 
 
 
+@never_cache
 def student_chat_user(request, user_id):
     student_id = request.session.get('student_id')
     if not student_id:
@@ -5488,6 +5495,7 @@ def parent_profile(request):
 
 
 
+@never_cache
 def parent_chat(request):
     parent_id = request.session.get('parent_id')  # Get parent ID from session
     if not parent_id:
@@ -5597,6 +5605,7 @@ def parent_chat(request):
 
 
 
+@never_cache
 def parent_chat_user(request, user_id):
     parent_id = request.session.get('parent_id')
     if not parent_id:
