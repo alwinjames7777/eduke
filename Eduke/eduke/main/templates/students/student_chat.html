@@ -76,9 +76,11 @@
                 </a>
               </li>
               <li  class="bg-gray-300 rounded-md">
-                <a href="#" class="flex items-center p-2 rounded-md hover:bg-[#e8c7ff]">
-                  <i class="fa-solid fa-comments"></i> &nbsp;
-                  Eduke Chat
+                <a href="#" class="flex items-center justify-between p-2 rounded-md hover:bg-[#e8c7ff]">
+                  <span><i class="fa-solid fa-comments"></i> &nbsp; Eduke Chat</span>
+                  {% if global_unread_chat_count > 0 %}
+                  <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ global_unread_chat_count }}</span>
+                  {% endif %}
                 </a>
               </li>
               <li>
@@ -101,34 +103,49 @@
         <div id="content-wrapper" class="p-6 space-y-6 w-full">
           <h2 class="text-2xl text-gray-800 uppercase font-bold">💬 Eduke Chat</h2>
           <div class="bg-white p-4 rounded-lg shadow-md overflow-y-auto" id="scrollbar-off">
+              <!-- Search Box -->
+              <div class="mb-4 mx-3">
+                <input type="text" id="chat-search" placeholder="🔍 Search contacts..." class="w-full px-4 py-2 border border-purple-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400">
+              </div>
+
               <h3 class="text-[20px] font-semibold mb-3 ml-3">Recent Chats</h3>
 
               <ul id="chat-list" class="space-y-3">
                 {% if class_heads or subject_heads %}
                     {% for class_head in class_heads %}
                         <li class="chat-item ml-3 mr-3">
-                            <a href="{% url 'student_chat_user' class_head.0 %}" class="flex items-center p-4 bg-gray-200 rounded-lg hover:bg-gray-300 transition w-full">
-                                <div class="w-12 h-12 bg-[#3a0065] text-white flex items-center justify-center rounded-full text-lg font-bold">
-                                    {{ class_head.1|first|upper }}
+                            <a href="{% url 'student_chat_user' class_head.0 %}" class="flex items-center justify-between p-4 {% if class_head.2 > 0 %}bg-purple-50 border border-purple-200{% else %}bg-gray-200{% endif %} rounded-lg hover:bg-gray-300 transition w-full">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-[#3a0065] text-white flex items-center justify-center rounded-full text-lg font-bold">
+                                        {{ class_head.1|first|upper }}
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="font-bold text-lg chat-name">{{ class_head.1 }}</p>
+                                        <p class="text-sm text-gray-500">Class Head</p>
+                                    </div>
                                 </div>
-                                <div class="ml-4">
-                                    <p class="font-bold text-lg chat-name">{{ class_head.1 }}</p>
-                                    <p class="text-sm text-gray-500">Class Head</p>
-                                </div>
+                                {% if class_head.2 > 0 %}
+                                <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[24px] text-center animate-pulse">{{ class_head.2 }}</span>
+                                {% endif %}
                             </a>
                         </li>
                     {% endfor %}
 
                     {% for subject_head in subject_heads %}
                         <li class="chat-item ml-3 mr-3">
-                            <a href="{% url 'student_chat_user' subject_head.0 %}" class="flex items-center p-4 bg-gray-200 rounded-lg hover:bg-gray-300 transition w-full">
-                                <div class="w-12 h-12 bg-[#7f00db] text-white flex items-center justify-center rounded-full text-lg font-bold">
-                                    {{ subject_head.1|first|upper }}
+                            <a href="{% url 'student_chat_user' subject_head.0 %}" class="flex items-center justify-between p-4 {% if subject_head.2 > 0 %}bg-purple-50 border border-purple-200{% else %}bg-gray-200{% endif %} rounded-lg hover:bg-gray-300 transition w-full">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-[#7f00db] text-white flex items-center justify-center rounded-full text-lg font-bold">
+                                        {{ subject_head.1|first|upper }}
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="font-bold text-lg chat-name">{{ subject_head.1 }}</p>
+                                        <p class="text-sm text-gray-500">Subject Head</p>
+                                    </div>
                                 </div>
-                                <div class="ml-4">
-                                    <p class="font-bold text-lg chat-name">{{ subject_head.1 }}</p>
-                                    <p class="text-sm text-gray-500">Subject Head</p>
-                                </div>
+                                {% if subject_head.2 > 0 %}
+                                <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[24px] text-center animate-pulse">{{ subject_head.2 }}</span>
+                                {% endif %}
                             </a>
                         </li>
                     {% endfor %}
@@ -170,7 +187,6 @@
 
   </div>
 
-  <!-- JavaScript to toggle sidebar visibility -->
   <script>
     const hamburgerButton = document.getElementById('hamburger-button');
     const sidebar = document.getElementById('sidebar');
@@ -178,8 +194,16 @@
 
     hamburgerButton.addEventListener('click', () => {
       sidebar.classList.toggle('-translate-x-full');
-      // Adjust main content width when the sidebar is hidden
       mainContent.classList.toggle('lg:w-full');
+    });
+
+    // Search filter
+    document.getElementById('chat-search').addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      document.querySelectorAll('.chat-item').forEach(item => {
+        const name = item.querySelector('.chat-name')?.textContent.toLowerCase() || '';
+        item.style.display = name.includes(q) ? '' : 'none';
+      });
     });
   </script>
 

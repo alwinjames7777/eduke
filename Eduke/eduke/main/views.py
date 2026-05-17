@@ -1792,11 +1792,26 @@ def class_head_chat(request):
             print(f"🔹 ID: {user[0]} | Role: {user[1]} | Name: {user[2]}")
         print("======================================\n")
 
-    # Prepare context for rendering
+    # Fetch unread counts per user for the class head
+    unread_counts = {}
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT sender_id, COUNT(*) FROM main_chat
+            WHERE receiver_id = %s AND is_read = 0
+            GROUP BY sender_id
+        """, [class_head_user.id])
+        for row in cursor.fetchall():
+            unread_counts[row[0]] = row[1]
+
+    # Attach unread count to each involved user tuple: (id, role, name, unread)
+    involved_users_with_unread = [
+        (u[0], u[1], u[2], unread_counts.get(u[0], 0)) for u in involved_users
+    ]
+
     context = {
         'class_head': class_head,
-        'involved_users': involved_users,
-        'all_users_for_class': all_users_for_class,  # Users the class head can message
+        'involved_users': involved_users_with_unread,
+        'all_users_for_class': all_users_for_class,
     }
 
     return render(request, "class_head/class_head_chat.html", context)
@@ -1856,17 +1871,20 @@ def class_head_chat_user(request, user_id):
 
     print(f"Chatting with {selected_user_name} ({selected_user_role})")
 
+    # Mark messages sent TO the logged-in class head as read
+    Chat.objects.filter(sender_id=user_id, receiver_id=logged_in_user_id, is_read=False).update(is_read=True)
+
     # Fetch messages between logged-in user and selected user
     messages = []
     with connection.cursor() as cursor:
-        cursor.execute(""" 
-            SELECT message, sender_id, receiver_id, created_at 
-            FROM main_chat 
-            WHERE (sender_id = %s AND receiver_id = %s) 
-            OR (sender_id = %s AND receiver_id = %s) 
+        cursor.execute("""
+            SELECT message, sender_id, receiver_id, created_at
+            FROM main_chat
+            WHERE (sender_id = %s AND receiver_id = %s)
+            OR (sender_id = %s AND receiver_id = %s)
             ORDER BY created_at;
-        """, [user_id, logged_in_user_id, logged_in_user_id, user_id])  
-        messages = cursor.fetchall() or []  # Prevent NoneType errors
+        """, [user_id, logged_in_user_id, logged_in_user_id, user_id])
+        messages = cursor.fetchall() or []
 
     print(f"Messages fetched between {logged_in_user_id} and {user_id}")
 
@@ -1880,7 +1898,7 @@ def class_head_chat_user(request, user_id):
                 message=message_text
             )
             print(f"Message sent: '{message_text}' from {logged_in_user_id} to {user_id}")
-            return redirect('class_head_chat_user', user_id=user_id)  # Refresh page after sending
+            return redirect('class_head_chat_user', user_id=user_id)
 
     context = {
         'selected_user_name': selected_user_name,
@@ -2550,7 +2568,26 @@ def subject_head_chat(request):
         print(f"    - ID: {user['id']}, Role: {user['role']}, Name: {user['name']}")
     print("\n")
 
-    return render(request, 'subject_head/subject_head_chat.html', {'chat_users': chat_users, 'message_users': message_users})
+    # Fetch unread counts per sender for the subject head
+    unread_counts = {}
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT sender_id, COUNT(*) FROM main_chat
+            WHERE receiver_id = %s AND is_read = 0
+            GROUP BY sender_id
+        """, [subject_user_id])
+        for row in cursor.fetchall():
+            unread_counts[row[0]] = row[1]
+
+    # Attach unread count to chat_users
+    chat_users_with_unread = [
+        {**u, 'unread': unread_counts.get(u['id'], 0)} for u in chat_users
+    ]
+
+    return render(request, 'subject_head/subject_head_chat.html', {
+        'chat_users': chat_users_with_unread,
+        'message_users': message_users
+    })
 
 
 
@@ -2605,6 +2642,9 @@ def subject_head_chat_user(request, user_id):
 
     selected_user_role, selected_user_name = selected_user
     print(f"DEBUG: Retrieved selected_user_role: {selected_user_role}, selected_user_name: {selected_user_name}")
+
+    # Mark messages sent TO the logged-in subject head as read
+    Chat.objects.filter(sender_id=user_id, receiver_id=subject_user_id, is_read=False).update(is_read=True)
 
     # Handle message sending
     if request.method == "POST":
@@ -4040,10 +4080,32 @@ def student_chat(request):
         cursor.execute(query_suggested_users, [student_id, student_id])
         suggested_users = cursor.fetchall()  # Returns [(user_id, role, name), ...]
 
+    # Fetch the student's own user_id for unread count query
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT user_id FROM main_students WHERE id = %s", [student_id])
+        row = cursor.fetchone()
+    student_user_id = row[0] if row else None
+
+    # Fetch unread counts per sender
+    unread_counts = {}
+    if student_user_id:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT sender_id, COUNT(*) FROM main_chat
+                WHERE receiver_id = %s AND is_read = 0
+                GROUP BY sender_id
+            """, [student_user_id])
+            for r in cursor.fetchall():
+                unread_counts[r[0]] = r[1]
+
+    # Attach unread count: (user_id, name, unread)
+    class_heads_with_unread = [(uid, name, unread_counts.get(uid, 0)) for uid, name in class_heads]
+    subject_heads_with_unread = [(uid, name, unread_counts.get(uid, 0)) for uid, name in subject_heads]
+
     return render(request, 'students/student_chat.html', {
-        'class_heads': class_heads,  # Contains [(user_id, class_head_name), ...]
-        'subject_heads': subject_heads,  # Contains [(user_id, subject_head_name), ...]
-        'suggested_users': suggested_users  # Contains [(user_id, role, name), ...]
+        'class_heads': class_heads_with_unread,
+        'subject_heads': subject_heads_with_unread,
+        'suggested_users': suggested_users
     })
 
 
@@ -4068,6 +4130,9 @@ def student_chat_user(request, user_id):
         return redirect('student_dashboard')
 
     logged_in_user_id = student_user_id[0]
+
+    # Mark messages sent TO the logged-in student as read
+    Chat.objects.filter(sender_id=user_id, receiver_id=logged_in_user_id, is_read=False).update(is_read=True)
 
     # Fetch messages between the logged-in student and the selected user
     query = '''
@@ -5509,8 +5574,24 @@ def parent_chat(request):
 
         print(f"Final suggested users: {suggested_users}")
 
+    # Fetch unread counts per sender for the parent
+    unread_counts = {}
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT sender_id, COUNT(*) FROM main_chat
+            WHERE receiver_id = %s AND is_read = 0
+            GROUP BY sender_id
+        """, [user_id])
+        for r in cursor.fetchall():
+            unread_counts[r[0]] = r[1]
+
+    # Attach unread: (uid, name, role, unread)
+    chat_users_with_unread = [
+        (u[0], u[1], u[2], unread_counts.get(u[0], 0)) for u in chat_users
+    ]
+
     return render(request, 'parents/parent_chat.html', {
-        'chat_users': chat_users,
+        'chat_users': chat_users_with_unread,
         'suggested_users': suggested_users,
     })
 
@@ -5534,8 +5615,10 @@ def parent_chat_user(request, user_id):
         messages.error(request, 'Parent not found.')
         return redirect('parent_dashboard')
 
-    # Debugging: Print the parent's user_id
     print(f"Parent's user_id for chat: {parent_user_id[0]}")
+
+    # Mark messages sent TO the logged-in parent as read
+    Chat.objects.filter(sender_id=user_id, receiver_id=parent_user_id[0], is_read=False).update(is_read=True)
 
     # Fetch messages between the logged-in parent and the selected user
     query = '''

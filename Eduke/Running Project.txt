@@ -1,0 +1,14 @@
+Running Project:
+cd C:\Users\User\eduke
+venv\Scripts\activate
+cd eduke\eduke
+python manage.py runserver
+
+Open SQLlite:
+cd C:\Users\User\eduke
+venv\Scripts\activate
+cd eduke\eduke
+python manage.py dbshell
+.tables
+SELECT * FROM main_users;
+.exit

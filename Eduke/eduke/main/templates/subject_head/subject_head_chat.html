@@ -82,9 +82,11 @@
                 </a>
               </li>
               <li class="bg-gray-300 rounded-md">
-                <a href="#" class="flex items-center p-2 rounded-md hover:bg-[#e8c7ff]">
-                  <i class="fa-solid fa-comments"></i> &nbsp;
-                  Eduke Chat
+                <a href="#" class="flex items-center justify-between p-2 rounded-md hover:bg-[#e8c7ff]">
+                  <span><i class="fa-solid fa-comments"></i> &nbsp; Eduke Chat</span>
+                  {% if global_unread_chat_count > 0 %}
+                  <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ global_unread_chat_count }}</span>
+                  {% endif %}
                 </a>
               </li>
               <li>
@@ -107,6 +109,11 @@
         <div id="content-wrapper" class="p-6 space-y-6 w-full">
           <h2 class="text-2xl text-gray-800 uppercase font-bold">💬 Eduke Chat</h2>
             <div class="bg-white p-4 rounded-lg shadow-md w-full h-[750px] overflow-y-auto" id="scrollbar-off">
+              <!-- Search Box -->
+              <div class="mb-4 mx-3">
+                <input type="text" id="chat-search" placeholder="🔍 Search contacts..." class="w-full px-4 py-2 border border-purple-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400">
+              </div>
+
                 <h3 class="text-[20px] font-semibold mb-3 ml-3">Recent Chats</h3>
 
                 <ul id="chat-list" class="space-y-3">
@@ -114,14 +121,12 @@
                         {% for user in chat_users %}
                             {% if user.role == "student" %}
                             <li class="chat-item ml-3 mr-3">
-                                <a href="{% url 'subject_head_chat_user' user.id %}" class="flex items-center p-4 bg-gray-200 rounded-lg hover:bg-gray-300 transition w-full">
-                                    <div class="w-12 h-12 bg-[#0093ff] text-white flex items-center justify-center rounded-full text-lg font-bold">
-                                        {{ user.name|first|upper }}
+                                <a href="{% url 'subject_head_chat_user' user.id %}" class="flex items-center justify-between p-4 {% if user.unread > 0 %}bg-purple-50 border border-purple-200{% else %}bg-gray-200{% endif %} rounded-lg hover:bg-gray-300 transition w-full">
+                                    <div class="flex items-center">
+                                        <div class="w-12 h-12 bg-[#0093ff] text-white flex items-center justify-center rounded-full text-lg font-bold">{{ user.name|first|upper }}</div>
+                                        <div class="ml-4"><p class="font-bold text-lg chat-name">{{ user.name }}</p><p class="text-sm text-gray-500">Student</p></div>
                                     </div>
-                                    <div class="ml-4">
-                                        <p class="font-bold text-lg chat-name">{{ user.name }}</p>  <!-- Display the user name -->
-                                        <p class="text-sm text-gray-500">Student</p>
-                                    </div>
+                                    {% if user.unread > 0 %}<span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">{{ user.unread }}</span>{% endif %}
                                 </a>
                             </li>
                             {% endif %}
@@ -130,14 +135,12 @@
                         {% for user in chat_users %}
                             {% if user.role == "parent" %}
                                 <li class="chat-item ml-3 mr-3">
-                                    <a href="{% url 'subject_head_chat_user' user.id %}" class="flex items-center p-4 bg-gray-200 rounded-lg hover:bg-gray-300 transition w-full">
-                                        <div class="w-12 h-12 bg-[#008152] text-white flex items-center justify-center rounded-full text-lg font-bold">
-                                            {{ user.name|first|upper }}
+                                    <a href="{% url 'subject_head_chat_user' user.id %}" class="flex items-center justify-between p-4 {% if user.unread > 0 %}bg-purple-50 border border-purple-200{% else %}bg-gray-200{% endif %} rounded-lg hover:bg-gray-300 transition w-full">
+                                        <div class="flex items-center">
+                                            <div class="w-12 h-12 bg-[#008152] text-white flex items-center justify-center rounded-full text-lg font-bold">{{ user.name|first|upper }}</div>
+                                            <div class="ml-4"><p class="font-bold text-lg chat-name">{{ user.name }}</p><p class="text-sm text-gray-500">Parent</p></div>
                                         </div>
-                                        <div class="ml-4">
-                                            <p class="font-bold text-lg chat-name">{{ user.name }}</p>  <!-- Display the user name -->
-                                        <p class="text-sm text-gray-500">Parent</p>
-                                        </div>
+                                        {% if user.unread > 0 %}<span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">{{ user.unread }}</span>{% endif %}
                                     </a>
                                 </li>
                             {% endif %}
@@ -146,14 +149,12 @@
                         {% for user in chat_users %}
                             {% if user.role == "subject_head" %}
                                 <li class="chat-item ml-3 mr-3">
-                                    <a href="{% url 'subject_head_chat_user' user.id %}" class="flex items-center p-4 bg-gray-200 rounded-lg hover:bg-gray-300 transition w-full">
-                                        <div class="w-12 h-12 bg-[#7f00db] text-white flex items-center justify-center rounded-full text-lg font-bold">
-                                            {{ user.name|first|upper }}
+                                    <a href="{% url 'subject_head_chat_user' user.id %}" class="flex items-center justify-between p-4 {% if user.unread > 0 %}bg-purple-50 border border-purple-200{% else %}bg-gray-200{% endif %} rounded-lg hover:bg-gray-300 transition w-full">
+                                        <div class="flex items-center">
+                                            <div class="w-12 h-12 bg-[#7f00db] text-white flex items-center justify-center rounded-full text-lg font-bold">{{ user.name|first|upper }}</div>
+                                            <div class="ml-4"><p class="font-bold text-lg chat-name">{{ user.name }}</p><p class="text-sm text-gray-500">Subject Head</p></div>
                                         </div>
-                                        <div class="ml-4">
-                                            <p class="font-bold text-lg chat-name">{{ user.name }}</p>  <!-- Display the user name -->
-                                        <p class="text-sm text-gray-500">Subject Head</p>
-                                        </div>
+                                        {% if user.unread > 0 %}<span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">{{ user.unread }}</span>{% endif %}
                                     </a>
                                 </li>
                             {% endif %}
@@ -162,14 +163,12 @@
                         {% for user in chat_users %}
                             {% if user.role == "class_head" %}
                                 <li class="chat-item ml-3 mr-3">
-                                    <a href="{% url 'subject_head_chat_user' user.id %}" class="flex items-center p-4 bg-gray-200 rounded-lg hover:bg-gray-300 transition w-full">
-                                        <div class="w-12 h-12 bg-[#3a0065] text-white flex items-center justify-center rounded-full text-lg font-bold">
-                                            {{ user.name|first|upper }} 
+                                    <a href="{% url 'subject_head_chat_user' user.id %}" class="flex items-center justify-between p-4 {% if user.unread > 0 %}bg-purple-50 border border-purple-200{% else %}bg-gray-200{% endif %} rounded-lg hover:bg-gray-300 transition w-full">
+                                        <div class="flex items-center">
+                                            <div class="w-12 h-12 bg-[#3a0065] text-white flex items-center justify-center rounded-full text-lg font-bold">{{ user.name|first|upper }}</div>
+                                            <div class="ml-4"><p class="font-bold text-lg chat-name">{{ user.name }}</p><p class="text-sm text-gray-500">Class Head</p></div>
                                         </div>
-                                        <div class="ml-4">
-                                            <p class="font-bold text-lg chat-name">{{ user.name }}</p>  <!-- Display the user name -->
-                                        <p class="text-sm text-gray-500">Class Head</p>
-                                        </div>
+                                        {% if user.unread > 0 %}<span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">{{ user.unread }}</span>{% endif %}
                                     </a>
                                 </li>
                             {% endif %}
@@ -282,16 +281,20 @@
 
   </div>
 
-  <!-- JavaScript to toggle sidebar visibility -->
   <script>
     const hamburgerButton = document.getElementById('hamburger-button');
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('main-content');
-
     hamburgerButton.addEventListener('click', () => {
       sidebar.classList.toggle('-translate-x-full');
-      // Adjust main content width when the sidebar is hidden
       mainContent.classList.toggle('lg:w-full');
+    });
+    document.getElementById('chat-search').addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      document.querySelectorAll('.chat-item').forEach(item => {
+        const name = item.querySelector('.chat-name')?.textContent.toLowerCase() || '';
+        item.style.display = name.includes(q) ? '' : 'none';
+      });
     });
   </script>
 
