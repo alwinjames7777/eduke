@@ -3307,9 +3307,10 @@ def update_attendance(request):
                     print(f"✅ Updated attendance ID {att_id} to status: {status}")
 
                 # Step 1: Get all unique student IDs that were updated
-                cursor.execute("""
-                    SELECT DISTINCT student_id FROM main_attendance WHERE id IN %s
-                """, [tuple(attendance_ids)])
+                placeholders = ', '.join(['%s'] * len(attendance_ids))
+                cursor.execute(f"""
+                    SELECT DISTINCT student_id FROM main_attendance WHERE id IN ({placeholders})
+                """, attendance_ids)
                 student_ids = [row[0] for row in cursor.fetchall()]
 
                 print(f"\n🔍 Students affected: {student_ids}")
@@ -3437,11 +3438,12 @@ def subject_head_evaluation(request):
 
     if student_ids:
         with connection.cursor() as cursor:
-            cursor.execute("""
+            placeholders = ', '.join(['%s'] * len(student_ids))
+            cursor.execute(f"""
                 SELECT student_id, academic_activity_rating, class_participation_rating
                 FROM main_studentevaluation
-                WHERE subject_id = %s AND student_id IN %s
-            """, [subject_id, tuple(student_ids)])
+                WHERE subject_id = %s AND student_id IN ({placeholders})
+            """, [subject_id] + list(student_ids))
 
             ratings = cursor.fetchall()
             for rating in ratings:
