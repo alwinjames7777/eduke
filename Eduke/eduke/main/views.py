@@ -2497,7 +2497,7 @@ def subject_head_chat(request):
                 s.subject_head, 
                 st.name, 
                 CASE 
-                    WHEN p.user_id IS NOT NULL THEN CONCAT('Parent of ', st2.name) 
+                    WHEN p.user_id IS NOT NULL THEN 'Parent of ' || st2.name 
                     ELSE NULL 
                 END
             ) AS name
@@ -2528,7 +2528,7 @@ def subject_head_chat(request):
             COALESCE(
                 st.name, 
                 CASE 
-                    WHEN p.user_id IS NOT NULL THEN CONCAT('Parent of ', st2.name) 
+                    WHEN p.user_id IS NOT NULL THEN 'Parent of ' || st2.name 
                     ELSE NULL 
                 END,
                 c.class_head,
@@ -2584,7 +2584,7 @@ def subject_head_chat_user(request, user_id):
                 s.subject_head, 
                 st.name, 
                 CASE 
-                    WHEN p.user_id IS NOT NULL THEN CONCAT('Parent of ', st2.name) 
+                    WHEN p.user_id IS NOT NULL THEN 'Parent of ' || st2.name 
                     ELSE NULL 
                 END
             ) AS name

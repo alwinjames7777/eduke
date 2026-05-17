@@ -1,0 +1,145 @@
+# Eduke: AI-Powered Academic Performance & Evaluation Platform
+
+## 1. Project Synopsis
+**Eduke** is a comprehensive, AI-driven educational management and student evaluation system built on the Django framework. Unlike traditional learning management systems that solely track grades and attendance, Eduke takes a holistic approach to student success. It tracks behavioral metrics (such as sleep time, study habits, and class participation) and uses a custom **Machine Learning Prediction Engine** to forecast a student's final academic performance. 
+
+By identifying at-risk students early and providing actionable insights, Eduke bridges the gap between students, subject heads, administrators, and parents.
+
+---
+
+## 2. Importance & Core Objectives
+The modern educational landscape requires data-driven decision-making. Eduke is important because it solves key problems in traditional schooling:
+* **Early Intervention:** The Machine Learning model predicts final scores midway through the semester, allowing teachers to assist struggling students before final exams.
+* **Holistic Evaluation:** It goes beyond grades by evaluating behavioral factors (sleep, study time, academic activity), proving that wellness impacts academic success.
+* **Unified Communication:** Integrated Chat and AI Bot systems ensure parents and students have instant access to academic guidance and real-time support.
+* **Automated Reporting:** Generates instant visual reports and charts for parent-teacher meetings, saving educators hours of manual data entry.
+
+---
+
+## 3. Key Features & Modules
+
+### 👥 Role-Based Access Control
+The platform provides customized, secure dashboards for four distinct user types:
+1. **Admin:** Full control over adding students, parents, subject heads, classes, and subjects.
+2. **Subject Head (Teacher):** Can mark attendance, input quiz/internal marks, evaluate student behavior, and view predictive graphs.
+3. **Student:** Can view their own predictive performance, attendance, and chat with teachers or the AI Bot.
+4. **Parent:** Can monitor their child's holistic progress, view predictions, and communicate with subject heads.
+
+### 🧠 Machine Learning Prediction Engine
+* **The Core:** A pre-trained Scikit-Learn `LinearRegression` model.
+* **The Features:** Takes 6 critical data points: `Attendance %`, `Internal Marks`, `Class Participation`, `Academic Activities`, `Sleep Time`, and `Study Time`.
+* **The Output:** Instantly predicts the student's expected Final Score (0-100%).
+
+### 📊 Attendance & Evaluation Tracking
+* **Attendance System:** Easy-to-use toggle system for tracking daily presence.
+* **Evaluation Metrics:** Teachers rate students on behavioral matrices, which feed directly into the predictive algorithm.
+* **Visual Analytics:** Uses `Chart.js` to render interactive bar charts comparing different metrics visually.
+
+### 💬 Eduke Chat & AI Bot
+* **Internal Chat:** A custom messaging interface allowing Subject Heads, Parents, and Students to communicate seamlessly.
+* **Eduke Bot:** An integrated AI assistant capable of answering academic queries dynamically.
+
+---
+
+## 4. In-Depth Module Analysis
+
+The Eduke platform is divided into distinct, interconnected modules that handle everything from basic user management to complex AI predictions. Below is an in-depth breakdown of these core modules based on the project's data schema and view logic.
+
+### 4.1. Core Identity & User Management Module
+**Purpose:** Handles role-based access, security, and hierarchical relationships within an educational institution.
+* **Institution:** The top-level entity representing the school or college.
+* **Users:** A unified identity table that categorizes users into four distinct roles (`class_head`, `subject_head`, `student`, `parent`). This ensures strict access control across the dashboards.
+* **Classes & Subjects:** Maps the academic structure. Each class has a dedicated Class Head, and each subject within that class is assigned to a specific Subject Head (Teacher).
+* **Students & Parents:** Links students to their respective classes and ties parent accounts directly to their children. This relational mapping allows parents to automatically see data relevant only to their child.
+
+### 4.2. Academic Tracking Module
+**Purpose:** Digitizes day-to-day academic records and assessments.
+* **Attendance Tracking:** Tracks daily presence (`Present` or `Absent`) on a subject-by-subject and hour-by-hour basis. This granular data is crucial because attendance directly impacts the AI prediction engine.
+* **Quizzes & Assessments:** 
+  * Allows Subject Heads to create custom quizzes (`Quizzes`, `QuizQuestions`).
+  * Students can submit answers digitally (`QuizResponse`), and the system calculates performance percentages automatically.
+* **Marks Logging:** A unified view for teachers to log internal examination marks, which are later normalized to percentages.
+
+### 4.3. Behavioral Evaluation Module (`StudentEvaluation`)
+**Purpose:** This is the most unique and critical module in Eduke. It shifts the focus from purely academic to holistic evaluation.
+* **Metrics Tracked:** Teachers evaluate and rate students (typically on a 0-100 scale) on factors like:
+  * `study_time_rating`: How much effort the student puts into self-study.
+  * `sleep_time_rating`: The student's restfulness and energy levels in class.
+  * `class_participation_rating`: Engagement during lectures.
+  * `academic_activity_rating`: Performance in assignments and practicals.
+* **Why it matters:** These metrics form the exact feature set required by the Machine Learning engine. By storing this in the database, Eduke creates a living dataset of student behavior.
+
+### 4.4. Machine Learning Engine (AI Prediction Module)
+**Purpose:** Uses the data gathered from the Academic and Behavioral modules to forecast future performance.
+* **The Logic (`ml/predict.py`):** It loads a pre-trained Scikit-Learn model (`final_model.pkl`) and a scaler (`scaler.pkl`). 
+* **The Flow:** When a teacher or parent views a student's profile, the system fetches their `attendance_percentage`, `marks_percentage`, and the four behavioral ratings. It scales these inputs (to ensure mathematical consistency) and feeds them into a Linear Regression model.
+* **The Output:** A projected final score (0-100%) is generated instantly. This acts as an "Early Warning System" for failing students.
+
+### 4.5. Communication & Resources Module
+**Purpose:** Eliminates the need for external messaging apps (like WhatsApp) by keeping all educational communication centralized and monitored.
+* **Eduke Chat:** A real-time, persistent messaging system where messages are linked between specific `sender` and `receiver` User IDs. 
+* **Announcements:** Class Heads can broadcast urgent messages or notices to their entire class.
+* **Study Materials:** Subject Heads can upload resources (PDFs, links) directly to the subject portal, making it instantly accessible to students.
+
+---
+
+## 5. Technology Stack
+* **Backend Framework:** Django 4.2 (Python 3.9)
+* **Database:** SQLite (optimized for portable, lightweight relational data management)
+* **Machine Learning:** `scikit-learn`, `pandas`, `numpy`, `joblib`
+* **Frontend:** HTML5, TailwindCSS (for modern, responsive UI), Vanilla JavaScript, Chart.js
+* **Security:** CSRF protection, Session-based Authentication, Secure Password Hashing
+
+---
+
+## 5. System Workflow (How It Works)
+
+1. **Initialization:** The Admin creates a Class, assigns a Subject Head, and registers Students (which automatically generates Parent and Student login accounts).
+2. **Data Entry:** Throughout the semester, the Subject Head updates Attendance and inputs Evaluation Ratings (1-100 scale).
+3. **Prediction Generation:** When a user visits the Student Profile, the backend compiles the data, normalizes it using a `MinMaxScaler`, feeds it into the `LinearRegression` model, and returns a real-time forecasted grade.
+4. **Reporting:** Data is visualized on the frontend. Teachers can click "Print Report" to generate an immediate physical progress report.
+
+---
+
+## 6. How to Use & Setup the Project Locally
+
+### Step 1: Environment Setup
+Ensure you have **Python 3.9** installed. Open a terminal in the root directory and create a virtual environment:
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+### Step 2: Install Dependencies
+Install all required libraries using the provided requirements file:
+```bash
+pip install -r requirements.txt
+```
+
+### Step 3: Database Migration
+Initialize the SQLite database with the Django schemas:
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+### Step 4: Train the Machine Learning Model
+Before predicting scores, generate the `final_model.pkl` and `scaler.pkl` files based on your local environment:
+```bash
+python ml/train_model.py
+```
+*(This ensures perfect compatibility with your installed version of Scikit-Learn and Numpy).*
+
+### Step 5: Run the Application
+Start the Django development server:
+```bash
+python manage.py runserver
+```
+Navigate to `http://127.0.0.1:8000` in your web browser.
+
+---
+
+## 7. Future Scope
+* **Deep Learning Integration:** Transitioning from Linear Regression to Neural Networks for even more accurate, non-linear grade predictions.
+* **Automated Alerts:** Sending automated email/SMS alerts to parents if a student's predicted score drops below a passing threshold.
+* **Export Features:** Adding CSV/PDF batch export capabilities for entire classes.
