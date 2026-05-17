@@ -85,6 +85,7 @@ class Chat(models.Model):
     message = models.TextField()
     sender = models.ForeignKey(Users, related_name='sent_messages', on_delete=models.CASCADE)
     receiver = models.ForeignKey(Users, related_name='received_messages', on_delete=models.CASCADE)
+    is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
 class Quizzes(models.Model):
