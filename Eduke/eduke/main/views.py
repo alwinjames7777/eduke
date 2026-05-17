@@ -3615,7 +3615,10 @@ def subject_head_students(request, student_id):
                 )
 
                 # Ensure predicted marks is a float or None
-                predicted_marks = round(float(predicted_marks), 2) if predicted_marks is not None else None
+                try:
+                    predicted_marks = round(float(predicted_marks), 2) if predicted_marks is not None else None
+                except ValueError:
+                    predicted_marks = None
                 print(f"[DEBUG] Predicted Marks: {predicted_marks}")
 
             else:
@@ -3654,9 +3657,7 @@ def subject_head_students(request, student_id):
         ]
 
     except Exception as e:
-        print(f"[ERROR] An error occurred: {e}")
-        return redirect('error_page')  
-
+        return redirect('subject_head_dashboard')
     context = {
         "student": student_data,
         "evaluations": evaluations,
